@@ -119,7 +119,7 @@ resource "openstack_compute_instance_v2" "fed_test" {
   flavor_name     = "b2-15"
   user_data       = data.template_file.userdata.rendered
   key_pair        = openstack_compute_keypair_v2.mattkey.name
-  security_groups = [openstack_networking_secgroup_v2.secgroup_1.name, openstack_networking_secgroup_v2.secgroup_2.name]
+  security_groups = [openstack_networking_secgroup_v2.secgroup_1.name,]
 
   network {
       access_network = true
