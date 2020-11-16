@@ -1,4 +1,4 @@
-resource "openstack_compute_keypair_v2" "mattkey" {
+resource "openstack_compute_keypair_v2" "ssh_key" {
   provider   = openstack.ovh
   name       = "${var.linux_user}-key"
   public_key = file(var.ssh_key_file)
@@ -118,7 +118,7 @@ resource "openstack_compute_instance_v2" "fed_test" {
   image_name      = "Fedora 32"
   flavor_name     = "b2-15"
   user_data       = data.template_file.userdata.rendered
-  key_pair        = openstack_compute_keypair_v2.mattkey.name
+  key_pair        = openstack_compute_keypair_v2.ssh_key.name
   security_groups = [openstack_networking_secgroup_v2.secgroup_1.name,]
 
   network {
