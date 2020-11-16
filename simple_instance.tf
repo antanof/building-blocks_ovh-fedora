@@ -99,16 +99,16 @@ CLOUDCONFIG
 
 data "openstack_images_image_v2" "fedora" {
   region      = var.region
-  name        = "Fedora 32" # Nom de l'image
-  most_recent = true # Limite la recherche à la plus récente
-  provider    = openstack.ovh # Nom du fournisseur
+  name        = "Fedora 32"
+  most_recent = true
+  provider    = openstack.ovh
 }
 
 resource "openstack_blockstorage_volume_v2" "backup" {
   region      = var.region
-  name        = "data_disk" # Nom du périphérique de stockage
-  size        = 10 # Taille
-  provider    = openstack.ovh # Nom du fournisseur
+  name        = "data_disk"
+  size        = 10
+  provider    = openstack.ovh
 }
 
 resource "openstack_compute_instance_v2" "fed_test" {
@@ -119,37 +119,29 @@ resource "openstack_compute_instance_v2" "fed_test" {
   flavor_name     = "b2-15"
   user_data       = data.template_file.userdata.rendered
   key_pair        = openstack_compute_keypair_v2.mattkey.name
-  security_groups = [openstack_networking_secgroup_v2.secgroup_1.name] # Ajoute la machine au groupe de sécurité
-   # network {
-   #   name    = "Ext-Net"
-   # }
+  security_groups = [openstack_networking_secgroup_v2.secgroup_1.name, openstack_networking_secgroup_v2.secgroup_2.name]
+
   network {
       access_network = true
       port           = openstack_networking_port_v2.public_a.id
   }
   network {
       name = var.private_network
-   # Adresse IP prise depuis la liste défini précédemment
-   # fixed_ip_v4 = "${element(var.front_private_ip, count.index)}"
   }
 
   block_device {
-    uuid                  = data.openstack_images_image_v2.fedora.id # Identifiant de l'image de la machine
-    source_type           = "image" # Type de source
-    destination_type      = "local" # Destination
-    volume_size           = 100 # Taille
-    boot_index            = 0 # Ordre de boot
-    delete_on_termination = true # Le périphérique sera supprimé avec la machine
+    uuid                  = data.openstack_images_image_v2.fedora.id
+    source_type           = "image"
+    destination_type      = "local"
+    volume_size           = 100
+    boot_index            = 0
+    delete_on_termination = true
   }
   block_device {
-    uuid                  = openstack_blockstorage_volume_v2.backup.id # Identifiant du périphérique de stockage
-    source_type           = "volume" # Type de source
-    destination_type      = "volume" # Destination
-    boot_index            = 1 # Ordre de boot
-    delete_on_termination = true # Le périphérique sera supprimé avec la machine
+    uuid                  = openstack_blockstorage_volume_v2.backup.id
+    source_type           = "volume"
+    destination_type      = "volume"
+    boot_index            = 1
+    delete_on_termination = true
   }
-}
-
-output "Server_IP" {
-  value = openstack_networking_port_v2.public_a.all_fixed_ips
 }
